@@ -10,6 +10,7 @@ import androidx.annotation.NonNull
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import android.util.Log
 import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
@@ -39,6 +40,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        Log.v("IN_APP_UPDATE", "onAttachedToEngine() called")
         channel = MethodChannel(
             flutterPluginBinding.binaryMessenger,
             "in_app_update"
@@ -47,6 +49,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.v("IN_APP_UPDATE", "onDetachedFromEngine() called")
         channel.setMethodCallHandler(null)
     }
 
@@ -58,6 +61,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     private var appUpdateManager: AppUpdateManager? = null
 
     override fun onMethodCall(call: MethodCall, result: Result) {
+        Log.v("IN_APP_UPDATE", "onMethodCall() called")
         when (call.method) {
             "checkForUpdate" -> checkForUpdate(result)
             "performImmediateUpdate" -> performImmediateUpdate(result)
@@ -68,6 +72,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        Log.v("IN_APP_UPDATE", "onActivityResult() called")
         if (requestCode == REQUEST_CODE_START_UPDATE) {
             if (appUpdateType == AppUpdateType.IMMEDIATE) {
                 if (resultCode == RESULT_CANCELED) {
@@ -96,6 +101,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
 
 
     override fun onAttachedToActivity(activityPluginBinding: ActivityPluginBinding) {
+        Log.v("IN_APP_UPDATE", "onAttachedToActivity() called")
         activityProvider = object : ActivityProvider {
             override fun addActivityResultListener(callback: PluginRegistry.ActivityResultListener) {
                 activityPluginBinding.addActivityResultListener(callback)
@@ -108,10 +114,12 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        Log.v("IN_APP_UPDATE", "onDetachedFromActivityForConfigChanges() called")
         activityProvider = null
     }
 
     override fun onReattachedToActivityForConfigChanges(activityPluginBinding: ActivityPluginBinding) {
+        Log.v("IN_APP_UPDATE", "onReattachedToActivityForConfigChanges() called")
         activityProvider = object : ActivityProvider {
             override fun addActivityResultListener(callback: PluginRegistry.ActivityResultListener) {
                 activityPluginBinding.addActivityResultListener(callback)
@@ -124,6 +132,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onDetachedFromActivity() {
+        Log.v("IN_APP_UPDATE", "onDetachedFromActivity() called")
         activityProvider = null
     }
 
@@ -140,6 +149,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     override fun onActivityStopped(activity: Activity) {}
 
     override fun onActivityResumed(activity: Activity) {
+        Log.v("IN_APP_UPDATE", "onActivityResumed() called")
         appUpdateManager
             ?.appUpdateInfo
             ?.addOnSuccessListener { appUpdateInfo ->
@@ -158,6 +168,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun performImmediateUpdate(result: Result) = checkAppState(result) {
+        Log.v("IN_APP_UPDATE", "performImmediateUpdate() called")
         appUpdateType = AppUpdateType.IMMEDIATE
         updateResult = result
         appUpdateManager?.startUpdateFlowForResult(
@@ -182,6 +193,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun startFlexibleUpdate(result: Result) = checkAppState(result) {
+        Log.v("IN_APP_UPDATE", "startFlexibleUpdate(() called")
         appUpdateType = AppUpdateType.FLEXIBLE
         updateResult = result
         appUpdateManager?.startUpdateFlowForResult(
@@ -206,10 +218,12 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private fun completeFlexibleUpdate(result: Result) = checkAppState(result) {
+        Log.v("IN_APP_UPDATE", "completeFlexibleUpdate() called")
         appUpdateManager?.completeUpdate()
     }
 
     private fun checkForUpdate(result: Result) {
+        Log.v("IN_APP_UPDATE", "checkForUpdate() called")
         requireNotNull(activityProvider?.activity()) {
             result.error("REQUIRE_FOREGROUND_ACTIVITY", "in_app_update requires a foreground activity", null)
         }
