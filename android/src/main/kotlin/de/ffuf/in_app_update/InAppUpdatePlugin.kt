@@ -136,17 +136,29 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
         activityProvider = null
     }
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        Log.v("IN_APP_UPDATE", "onActivityCreated() called")
+    }
 
-    override fun onActivityPaused(activity: Activity) {}
+    override fun onActivityPaused(activity: Activity) {
+        Log.v("IN_APP_UPDATE", "onActivityPaused() called")
+    }
 
-    override fun onActivityStarted(activity: Activity) {}
+    override fun onActivityStarted(activity: Activity) {
+        Log.v("IN_APP_UPDATE", "onActivityStarted() called")
+    }
 
-    override fun onActivityDestroyed(activity: Activity) {}
+    override fun onActivityDestroyed(activity: Activity) {
+        Log.v("IN_APP_UPDATE", "onActivityDestroyed() called")
+    }
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+        Log.v("IN_APP_UPDATE", "onActivitySaveInstanceState() called")
+    }
 
-    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {
+        Log.v("IN_APP_UPDATE", "onActivityStopped() called")
+    }
 
     override fun onActivityResumed(activity: Activity) {
         Log.v("IN_APP_UPDATE", "onActivityResumed() called")
