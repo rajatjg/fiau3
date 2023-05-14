@@ -34,7 +34,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     PluginRegistry.ActivityResultListener, Application.ActivityLifecycleCallbacks, ActivityAware {
 
     companion object {
-        private const val REQUEST_CODE_START_UPDATE = 1276
+        private const val REQUEST_CODE_START_UPDATE = 1278
     }
 
     private lateinit var channel: MethodChannel
