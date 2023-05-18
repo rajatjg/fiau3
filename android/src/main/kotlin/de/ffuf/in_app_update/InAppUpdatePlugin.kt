@@ -215,6 +215,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
             REQUEST_CODE_START_UPDATE
         )
         appUpdateManager?.registerListener { state ->
+        Log.v("IN_APP_UPDATE", "in listener after starting download")
             if (state.installStatus() == InstallStatus.DOWNLOADED) {
                 updateResult?.success(null)
                 updateResult = null
