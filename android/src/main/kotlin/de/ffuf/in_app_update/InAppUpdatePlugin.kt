@@ -72,7 +72,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        Log.v("IN_APP_UPDATE", "onActivityResult() called")
+        Log.v("IN_APP_UPDATE", "onActivityResult()...... called")
         if (requestCode == REQUEST_CODE_START_UPDATE) {
             if (appUpdateType == AppUpdateType.IMMEDIATE) {
                 if (resultCode == RESULT_CANCELED) {
@@ -161,7 +161,7 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     override fun onActivityResumed(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityResumed() called")
+        Log.v("IN_APP_UPDATE", "onActivityResumed()....... called")
         appUpdateManager
             ?.appUpdateInfo
             ?.addOnSuccessListener { appUpdateInfo ->
