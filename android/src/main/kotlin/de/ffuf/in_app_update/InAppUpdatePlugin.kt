@@ -25,12 +25,20 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
+import com.google.gson.Gson
+import android.annotation.SuppressLint
+import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.*
+import io.flutter.plugin.common.*
+
+
+
 interface ActivityProvider {
     fun addActivityResultListener(callback: PluginRegistry.ActivityResultListener)
     fun activity(): Activity?
 }
 
-class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
+class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler,
     PluginRegistry.ActivityResultListener, Application.ActivityLifecycleCallbacks, ActivityAware {
 
     companion object {
@@ -38,6 +46,9 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private lateinit var channel: MethodChannel
+    private lateinit var eventChannel: EventChannel
+    private var appUpdateEventSink: EventChannel.EventSink? = null
+
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         Log.v("IN_APP_UPDATE", "onAttachedToEngine() called")
@@ -46,6 +57,11 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
             "in_app_update"
         )
         channel.setMethodCallHandler(this)
+        eventChannel = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            "in_googleplay_update_event"
+        )
+        eventChannel.setStreamHandler(this)
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
@@ -54,7 +70,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
     }
 
     private var activityProvider: ActivityProvider? = null
-
     private var updateResult: Result? = null
     private var appUpdateType: Int? = null
     private var appUpdateInfo: AppUpdateInfo? = null
@@ -70,6 +85,15 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
             else -> result.notImplemented()
         }
     }
+
+    override fun onCancel(arguments: Any?) {
+        appUpdateEventSink = null
+    }
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        appUpdateEventSink = events
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         Log.v("IN_APP_UPDATE", "onActivityResult()...... called")
@@ -214,20 +238,75 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler,
             activityProvider!!.activity()!!,
             REQUEST_CODE_START_UPDATE
         )
-        appUpdateManager?.registerListener { state ->
-        Log.v("IN_APP_UPDATE", "in listener after starting download")
-            if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                updateResult?.success(null)
-                updateResult = null
-            } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
-                updateResult?.error(
-                    "Error during installation",
-                    state.installErrorCode().toString(),
-                    null
-                )
-                updateResult = null
-            }
-        }
+
+        ///
+
+        val installStateUpdatedListener = InstallStateUpdatedListener { state ->
+      // (Optional) Provide a download progress bar.
+      if (state.installStatus() == InstallStatus.DOWNLOADING) {
+
+        Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
+        Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
+
+        val byteData = InGooglePlayByteData(
+          state.bytesDownloaded().toString(),
+          state.totalBytesToDownload().toString()
+        );
+
+        val byteJsonString = Gson().toJson(byteData)
+
+        appUpdateEventSink?.success(byteJsonString);
+
+        updateResult?.success(null)
+        updateResult = null
+        // Show update progress bar.
+      } else  if (state.installStatus() == InstallStatus.DOWNLOADED) {
+
+
+        Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
+        Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
+
+        val byteData = InGooglePlayByteData(
+          state.bytesDownloaded().toString(),
+          state.totalBytesToDownload().toString()
+        );
+
+        val byteJsonString = Gson().toJson(byteData)
+
+        appUpdateEventSink?.success(byteJsonString);
+
+        updateResult?.success(null)
+        updateResult = null
+      } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
+        updateResult?.error(
+          "Error during installation",
+          state.installErrorCode().toString(),
+          null
+        )
+        updateResult = null
+      }
+      // Log state or install the update.
+    }
+    appUpdateManager?.registerListener(installStateUpdatedListener);
+
+
+
+
+        ///
+        // appUpdateManager?.registerListener { state ->
+        // Log.v("IN_APP_UPDATE", "in listener after starting download")
+        //     if (state.installStatus() == InstallStatus.DOWNLOADED) {
+        //         updateResult?.success(null)
+        //         updateResult = null
+        //     } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
+        //         updateResult?.error(
+        //             "Error during installation",
+        //             state.installErrorCode().toString(),
+        //             null
+        //         )
+        //         updateResult = null
+        //     }
+        // }
     }
 
     private fun completeFlexibleUpdate(result: Result) = checkAppState(result) {
