@@ -257,8 +257,8 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
         appUpdateEventSink?.success(byteJsonString);
 
-        updateResult?.success(null)
-        updateResult = null
+        // updateResult?.success(null)
+        // updateResult = null
         // Show update progress bar.
       } else  if (state.installStatus() == InstallStatus.DOWNLOADED) {
 
@@ -274,7 +274,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
         val byteJsonString = Gson().toJson(byteData)
 
         appUpdateEventSink?.success(byteJsonString);
-
         updateResult?.success(null)
         updateResult = null
       } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
