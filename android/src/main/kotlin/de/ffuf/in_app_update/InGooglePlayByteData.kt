@@ -6,7 +6,7 @@ data class InGooglePlayByteData (
     @SerializedName("bytes_downloaded")
     val bytesDownloaded: String? = null,
     @SerializedName("total_bytes_to_download")
-    val totalBytesToDownload: String? = null
+    val totalBytesToDownload: String? = null,
     @SerializedName("current_state")
     val currentState: String? = null
 )
