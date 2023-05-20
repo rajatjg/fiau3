@@ -117,6 +117,11 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
                     updateResult?.error("IN_APP_UPDATE_FAILED", resultCode.toString(), null)
                     updateResult = null
                 }
+                else if (resultCode == RESULT_OK) {
+                    Log.v("IN_APP_UPDATE", "in onActivityResult, FU, Result OK");
+                    updateResult?.success(null)
+                    updateResult = null
+                }
                 return true
             }
         }
@@ -250,7 +255,8 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
         val byteData = InGooglePlayByteData(
           state.bytesDownloaded().toString(),
-          state.totalBytesToDownload().toString()
+          state.totalBytesToDownload().toString(),
+          "downloading"
         );
 
         val byteJsonString = Gson().toJson(byteData)
@@ -268,13 +274,14 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
         val byteData = InGooglePlayByteData(
           state.bytesDownloaded().toString(),
-          state.totalBytesToDownload().toString()
+          state.totalBytesToDownload().toString(),
+          "downloaded"
         );
 
         val byteJsonString = Gson().toJson(byteData)
 
         appUpdateEventSink?.success(byteJsonString);
-        updateResult?.success(null)
+        // updateResult?.success(null)
         updateResult = null
       } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
         updateResult?.error(
