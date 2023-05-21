@@ -87,10 +87,12 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     override fun onCancel(arguments: Any?) {
+        Log.v("IN_APP_UPDATE", "onCancel() called")
         appUpdateEventSink = null
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        Log.v("IN_APP_UPDATE", "onListen() called")
         appUpdateEventSink = events
     }
 
