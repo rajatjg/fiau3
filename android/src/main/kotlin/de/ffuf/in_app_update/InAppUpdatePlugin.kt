@@ -245,76 +245,40 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
             activityProvider!!.activity()!!,
             REQUEST_CODE_START_UPDATE
         )
-
-        ///
-
         val installStateUpdatedListener = InstallStateUpdatedListener { state ->
-      // (Optional) Provide a download progress bar.
-      if (state.installStatus() == InstallStatus.DOWNLOADING) {
-
-        Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
-        Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
-
-        val byteData = InGooglePlayByteData(
-          state.bytesDownloaded().toString(),
-          state.totalBytesToDownload().toString(),
-          "downloading"
-        );
-
-        val byteJsonString = Gson().toJson(byteData)
-
-        appUpdateEventSink?.success(byteJsonString);
-
-        // updateResult?.success(null)
-        // updateResult = null
-        // Show update progress bar.
-      } else  if (state.installStatus() == InstallStatus.DOWNLOADED) {
-
-
-        Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
-        Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
-
-        val byteData = InGooglePlayByteData(
-          state.bytesDownloaded().toString(),
-          state.totalBytesToDownload().toString(),
-          "downloaded"
-        );
-
-        val byteJsonString = Gson().toJson(byteData)
-
-        appUpdateEventSink?.success(byteJsonString);
-        // updateResult?.success(null)
-        updateResult = null
-      } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
-        updateResult?.error(
-          "Error during installation",
-          state.installErrorCode().toString(),
-          null
-        )
-        updateResult = null
-      }
-      // Log state or install the update.
+        if (state.installStatus() == InstallStatus.DOWNLOADING) {
+            Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
+            Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
+            val byteData = InGooglePlayByteData(
+            state.bytesDownloaded().toString(),
+            state.totalBytesToDownload().toString(),
+            "downloading"
+            );
+            val byteJsonString = Gson().toJson(byteData)
+            appUpdateEventSink?.success(byteJsonString);
+        } else  if (state.installStatus() == InstallStatus.DOWNLOADED) {
+            Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
+            Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
+            val byteData = InGooglePlayByteData(
+            state.bytesDownloaded().toString(),
+            state.totalBytesToDownload().toString(),
+            "downloaded"
+            );
+            val byteJsonString = Gson().toJson(byteData)
+            appUpdateEventSink?.success(byteJsonString);
+            updateResult = null
+        } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
+            val byteData = InGooglePlayByteData(
+            "0",
+            "0",
+            "error"
+            );
+            val byteJsonString = Gson().toJson(byteData)
+            appUpdateEventSink?.success(byteJsonString);
+            updateResult = null
+        }
     }
     appUpdateManager?.registerListener(installStateUpdatedListener);
-
-
-
-
-        ///
-        // appUpdateManager?.registerListener { state ->
-        // Log.v("IN_APP_UPDATE", "in listener after starting download")
-        //     if (state.installStatus() == InstallStatus.DOWNLOADED) {
-        //         updateResult?.success(null)
-        //         updateResult = null
-        //     } else if (state.installErrorCode() != InstallErrorCode.NO_ERROR) {
-        //         updateResult?.error(
-        //             "Error during installation",
-        //             state.installErrorCode().toString(),
-        //             null
-        //         )
-        //         updateResult = null
-        //     }
-        // }
     }
 
     private fun completeFlexibleUpdate(result: Result) = checkAppState(result) {
