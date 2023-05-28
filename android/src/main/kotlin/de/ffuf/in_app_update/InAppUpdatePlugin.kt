@@ -51,7 +51,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        Log.v("IN_APP_UPDATE", "onAttachedToEngine() called")
         channel = MethodChannel(
             flutterPluginBinding.binaryMessenger,
             "in_app_update"
@@ -65,7 +64,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.v("IN_APP_UPDATE", "onDetachedFromEngine() called")
         channel.setMethodCallHandler(null)
     }
 
@@ -76,7 +74,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     private var appUpdateManager: AppUpdateManager? = null
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        Log.v("IN_APP_UPDATE", "onMethodCall() called")
         when (call.method) {
             "checkForUpdate" -> checkForUpdate(result)
             "performImmediateUpdate" -> performImmediateUpdate(result)
@@ -87,18 +84,15 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     override fun onCancel(arguments: Any?) {
-        Log.v("IN_APP_UPDATE", "onCancel() called")
         appUpdateEventSink = null
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        Log.v("IN_APP_UPDATE", "onListen() called")
         appUpdateEventSink = events
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        Log.v("IN_APP_UPDATE", "onActivityResult()...... called")
         if (requestCode == REQUEST_CODE_START_UPDATE) {
             if (appUpdateType == AppUpdateType.IMMEDIATE) {
                 if (resultCode == RESULT_CANCELED) {
@@ -120,7 +114,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
                     updateResult = null
                 }
                 else if (resultCode == RESULT_OK) {
-                    Log.v("IN_APP_UPDATE", "in onActivityResult, FU, Result OK");
                     updateResult?.success(null)
                     updateResult = null
                 }
@@ -132,7 +125,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
 
 
     override fun onAttachedToActivity(activityPluginBinding: ActivityPluginBinding) {
-        Log.v("IN_APP_UPDATE", "onAttachedToActivity() called")
         activityProvider = object : ActivityProvider {
             override fun addActivityResultListener(callback: PluginRegistry.ActivityResultListener) {
                 activityPluginBinding.addActivityResultListener(callback)
@@ -145,12 +137,10 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        Log.v("IN_APP_UPDATE", "onDetachedFromActivityForConfigChanges() called")
         activityProvider = null
     }
 
     override fun onReattachedToActivityForConfigChanges(activityPluginBinding: ActivityPluginBinding) {
-        Log.v("IN_APP_UPDATE", "onReattachedToActivityForConfigChanges() called")
         activityProvider = object : ActivityProvider {
             override fun addActivityResultListener(callback: PluginRegistry.ActivityResultListener) {
                 activityPluginBinding.addActivityResultListener(callback)
@@ -163,36 +153,28 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     override fun onDetachedFromActivity() {
-        Log.v("IN_APP_UPDATE", "onDetachedFromActivity() called")
         activityProvider = null
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        Log.v("IN_APP_UPDATE", "onActivityCreated() called")
     }
 
     override fun onActivityPaused(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityPaused() called")
     }
 
     override fun onActivityStarted(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityStarted() called")
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityDestroyed() called")
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-        Log.v("IN_APP_UPDATE", "onActivitySaveInstanceState() called")
     }
 
     override fun onActivityStopped(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityStopped() called")
     }
 
     override fun onActivityResumed(activity: Activity) {
-        Log.v("IN_APP_UPDATE", "onActivityResumed()....... called")
         appUpdateManager
             ?.appUpdateInfo
             ?.addOnSuccessListener { appUpdateInfo ->
@@ -211,7 +193,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     private fun performImmediateUpdate(result: Result) = checkAppState(result) {
-        Log.v("IN_APP_UPDATE", "performImmediateUpdate() called")
         appUpdateType = AppUpdateType.IMMEDIATE
         updateResult = result
         appUpdateManager?.startUpdateFlowForResult(
@@ -236,7 +217,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     private fun startFlexibleUpdate(result: Result) = checkAppState(result) {
-        Log.v("IN_APP_UPDATE", "startFlexibleUpdate(() called")
         appUpdateType = AppUpdateType.FLEXIBLE
         updateResult = result
         appUpdateManager?.startUpdateFlowForResult(
@@ -247,8 +227,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
         )
         val installStateUpdatedListener = InstallStateUpdatedListener { state ->
         if (state.installStatus() == InstallStatus.DOWNLOADING) {
-            Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
-            Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
             val byteData = InGooglePlayByteData(
             state.bytesDownloaded().toString(),
             state.totalBytesToDownload().toString(),
@@ -257,8 +235,6 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
             val byteJsonString = Gson().toJson(byteData)
             appUpdateEventSink?.success(byteJsonString);
         } else  if (state.installStatus() == InstallStatus.DOWNLOADED) {
-            Log.d("FLEXIBLE_PROGRESS_UPDATE byte:", state.bytesDownloaded().toString());
-            Log.d("FLEXIBLE_PROGRESS_UPDATE total byte:", state.totalBytesToDownload().toString());
             val byteData = InGooglePlayByteData(
             state.bytesDownloaded().toString(),
             state.totalBytesToDownload().toString(),
@@ -282,12 +258,10 @@ class InAppUpdatePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamH
     }
 
     private fun completeFlexibleUpdate(result: Result) = checkAppState(result) {
-        Log.v("IN_APP_UPDATE", "completeFlexibleUpdate() called")
         appUpdateManager?.completeUpdate()
     }
 
     private fun checkForUpdate(result: Result) {
-        Log.v("IN_APP_UPDATE", "checkForUpdate() called")
         requireNotNull(activityProvider?.activity()) {
             result.error("REQUIRE_FOREGROUND_ACTIVITY", "in_app_update requires a foreground activity", null)
         }
